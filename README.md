@@ -1,18 +1,38 @@
-# Informacion extra en README
+# Tienda online, Pasteleria Mil Sabores
 
-# React + Vite
+Tienda online en React + Vite + React Router + React-Bootstrap, con panel de administracion y datos simulados con persistencia en localStorage.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## comandos para ejecutar en la terminal
 
-Currently, two official plugins are available:
+```bash
+npm install
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+La tienda queda en http://localhost:5173
 
-## React Compiler
+## Cuentas de prueba
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | admin@milsabores.cl | admin123 |
+| Cliente Duoc | camila@duocuc.cl | camila123 |
+| Cliente con 50% de descuento | hernan@correo.cl | hernan123 |
 
-## Expanding the ESLint configuration
+## Estructura
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── data/        seeds.js, db.js (CRUD + persistencia), regiones.js
+├── hooks/       useColeccion.js
+├── context/     AuthContext.jsx, CartContext.jsx
+├── utils/       cart, beneficios, validators, filtros, ordenes, compra, reportes, formato, storage
+├── components/  common, store, layout, admin
+└── pages/       store, admin
+```
+
+## Rutas
+
+Tienda: `/` · `/productos` · `/productos/:id` · `/categorias` · `/categorias/:id` · `/ofertas` · `/carrito` · `/checkout` · `/compra/exito/:id` · `/compra/error/:id` · `/login` · `/registro` · `/nosotros` · `/blog` · `/blog/:id` · `/contacto`
+
+Admin: `/admin` · `/admin/ordenes` · `/admin/ordenes/:id` · `/admin/productos` · `/admin/productos/nuevo` · `/admin/productos/:id/editar` · `/admin/productos/criticos` · `/admin/productos/reportes` · `/admin/categorias` · `/admin/categorias/nueva` · `/admin/categorias/:id/editar` · `/admin/usuarios` · `/admin/usuarios/nuevo` · `/admin/usuarios/:id/editar` · `/admin/usuarios/:id/historial` · `/admin/reportes` · `/admin/perfil`
