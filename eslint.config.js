@@ -18,6 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    files: ['src/context/**'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])
 
 // Configuración de Linter para el proyecto de pasteleria mil sabores
