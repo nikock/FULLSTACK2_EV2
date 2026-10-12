@@ -22,14 +22,6 @@ function Nosotros() {
         positivo en la comunidad, especialmente en la formación de nuevos talentos en gastronomía.
       </p>
 
-      <h2>Nuestro obrador</h2>
-      <p>Un vistazo a cómo trabajamos en la pastelería.</p>
-      <div className="ratio ratio-16x9 video-obrador">
-        <video controls>
-          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-          Tu navegador no soporta el video.
-        </video>
-      </div>
     </Container>
   );
 }
