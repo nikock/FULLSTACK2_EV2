@@ -10,9 +10,9 @@ function descontarStock(items) {
   });
 }
 
-export function confirmarCompra({ cliente, direccion, detalle, totales, usuarioId = null, forzarRechazo = false }) {
+export function confirmarCompra({ cliente, entrega, direccion = null, detalle, totales, usuarioId = null, forzarRechazo = false }) {
   const estado = simularPago({ forzarRechazo });
-  const base = construirOrden({ cliente, direccion, detalle, totales, usuarioId, estado });
+  const base = construirOrden({ cliente, entrega, direccion, detalle, totales, usuarioId, estado });
   const creada = ordenesDB.crear(base);
   const orden = ordenesDB.actualizar(creada.id, { numero: generarNumeroOrden(creada.id, new Date(creada.fecha)) });
   if (estado === ESTADO_PAGADA) descontarStock(orden.items);
