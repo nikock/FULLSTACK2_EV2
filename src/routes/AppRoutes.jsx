@@ -16,6 +16,7 @@ import AdminReportes from '../pages/admin/AdminReportes';
 import AdminUsuarioForm from '../pages/admin/AdminUsuarioForm';
 import AdminUsuarioHistorial from '../pages/admin/AdminUsuarioHistorial';
 import AdminUsuarios from '../pages/admin/AdminUsuarios';
+import Entregas from './pages/entregas/entregas';
 import Blog from '../pages/store/Blog';
 import BlogDetalle from '../pages/store/BlogDetalle';
 import Carrito from '../pages/store/Carrito';
@@ -73,6 +74,7 @@ function AppRoutes() {
           <Route path="usuarios/nuevo" element={<AdminUsuarioForm />} />
           <Route path="usuarios/:usuarioId/editar" element={<AdminUsuarioForm />} />
           <Route path="usuarios/:usuarioId/historial" element={<AdminUsuarioHistorial />} />
+          <Route path="entregas" element={<Entregas />} />
           <Route path="reportes" element={<AdminReportes />} />
           <Route path="perfil" element={<AdminPerfil />} />
         </Route>
