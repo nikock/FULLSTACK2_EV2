@@ -12,11 +12,12 @@ export function simularPago({ forzarRechazo = false } = {}) {
   return forzarRechazo ? ESTADO_FALLIDA : ESTADO_PAGADA;
 }
 
-export function construirOrden({ cliente, direccion, detalle, totales, usuarioId = null, estado }, ahora = new Date()) {
+export function construirOrden({ cliente, entrega, direccion = null, detalle, totales, usuarioId = null, estado }, ahora = new Date()) {
   return {
     fecha: ahora.toISOString(),
     usuarioId,
     cliente,
+    entrega,
     direccion,
     items: detalle.map((linea) => ({
       productoId: linea.producto.id,
