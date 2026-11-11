@@ -16,7 +16,7 @@ import AdminReportes from '../pages/admin/AdminReportes';
 import AdminUsuarioForm from '../pages/admin/AdminUsuarioForm';
 import AdminUsuarioHistorial from '../pages/admin/AdminUsuarioHistorial';
 import AdminUsuarios from '../pages/admin/AdminUsuarios';
-import Entregas from './pages/entregas/entregas';
+import Entregas from '../pages/entregas/entregas';
 import Blog from '../pages/store/Blog';
 import BlogDetalle from '../pages/store/BlogDetalle';
 import Carrito from '../pages/store/Carrito';
