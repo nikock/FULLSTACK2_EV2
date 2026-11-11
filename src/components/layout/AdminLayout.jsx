@@ -9,6 +9,7 @@ const enlaces = [
   { to: '/admin/productos', texto: 'Productos' },
   { to: '/admin/categorias', texto: 'Categorías' },
   { to: '/admin/usuarios', texto: 'Usuarios' },
+  { to: '/admin/entregas', texto: 'Entregas' },
   { to: '/admin/reportes', texto: 'Reportes' },
   { to: '/admin/perfil', texto: 'Perfil' },
 ];
