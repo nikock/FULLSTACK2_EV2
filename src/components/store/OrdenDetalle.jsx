@@ -2,7 +2,7 @@ import { Table } from 'react-bootstrap';
 import { formatearFecha, formatearPrecio } from '../../utils/formato';
 
 function OrdenDetalle({ orden }) {
-  const { cliente, direccion } = orden;
+  const { cliente, direccion, entrega } = orden;
   return (
     <div className="orden-detalle">
       <dl className="row mb-3">
@@ -12,11 +12,21 @@ function OrdenDetalle({ orden }) {
         <dd className="col-sm-9">{formatearFecha(orden.fecha)}</dd>
         <dt className="col-sm-3">Cliente</dt>
         <dd className="col-sm-9">{cliente.nombre} {cliente.apellidos} — {cliente.correo}</dd>
-        <dt className="col-sm-3">Dirección</dt>
+        <dt className="col-sm-3">Entrega</dt>
         <dd className="col-sm-9">
-          {direccion.calle}
-          {direccion.departamento ? `, ${direccion.departamento}` : ''}, {direccion.comuna}, {direccion.region}
-          {direccion.indicaciones && <><br /><small className="text-muted">Indicaciones: {direccion.indicaciones}</small></>}
+          {entrega?.tipo === 'retiroTienda' ? (
+            <>
+              Retiro en tienda: {entrega.sucursal}
+              <br /><small className="text-muted">{entrega.fecha} a las {entrega.hora}</small>
+            </>
+          ) : (
+            <>
+              Delivery: {direccion.calle}
+              {direccion.departamento ? `, ${direccion.departamento}` : ''}, {direccion.comuna}, {direccion.region}
+              {entrega?.fecha && <><br /><small className="text-muted">Fecha de entrega: {entrega.fecha}</small></>}
+              {direccion.indicaciones && <><br /><small className="text-muted">Indicaciones: {direccion.indicaciones}</small></>}
+            </>
+          )}
         </dd>
       </dl>
 
