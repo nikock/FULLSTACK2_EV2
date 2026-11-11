@@ -38,15 +38,24 @@ export function validarRegistro({ nombre, apellidos, correo, nacimiento, clave, 
   return errores;
 }
 
-export function validarCheckout({ nombre, apellidos, correo, calle, region, comuna }) {
+export function validarCheckout({ nombre, apellidos, correo, tipoEntrega = 'delivery', calle, region, comuna, telefono, sucursal, fecha, hora }) {
   const errores = {};
   if (vacio(nombre)) errores.nombre = 'Ingresa tu nombre.';
   if (vacio(apellidos)) errores.apellidos = 'Ingresa tus apellidos.';
   if (vacio(correo)) errores.correo = 'Ingresa tu correo.';
   else if (!esCorreoValido(correo)) errores.correo = 'Ingresa un correo válido.';
-  if (vacio(calle)) errores.calle = 'Ingresa la calle y número.';
-  if (vacio(region)) errores.region = 'Selecciona una región.';
-  if (vacio(comuna)) errores.comuna = 'Selecciona una comuna.';
+  if (tipoEntrega === 'retiroTienda') {
+    if (vacio(sucursal)) errores.sucursal = 'Selecciona una sucursal.';
+    if (vacio(fecha)) errores.fecha = 'Selecciona la fecha de retiro.';
+    if (vacio(hora)) errores.hora = 'Selecciona la hora de retiro.';
+  } else {
+    if (vacio(calle)) errores.calle = 'Ingresa la calle y número.';
+    if (vacio(region)) errores.region = 'Selecciona una región.';
+    if (vacio(comuna)) errores.comuna = 'Selecciona una comuna.';
+    if (vacio(telefono)) errores.telefono = 'Ingresa un teléfono de contacto.';
+    else if (!/^\+?[0-9\s]{8,15}$/.test(String(telefono).trim())) errores.telefono = 'Ingresa un teléfono válido.';
+    if (vacio(fecha)) errores.fecha = 'Selecciona la fecha de entrega.';
+  }
   return errores;
 }
 
@@ -78,5 +87,28 @@ export function validarUsuarioAdmin({ nombre, apellidos, correo, clave, rol }, {
   if (!['admin', 'cliente'].includes(rol)) errores.rol = 'Selecciona un rol.';
   if (esNuevo && vacio(clave)) errores.clave = 'Ingresa una contraseña.';
   else if (!vacio(clave) && clave.length < 6) errores.clave = 'La contraseña debe tener al menos 6 caracteres.';
+  return errores;
+}
+
+export function validarRetiroTienda({ nombreRetira, correo, sucursal, fecha, hora }) {
+  const errores = {};
+  if (vacio(nombreRetira)) errores.nombreRetira = 'Ingresa el nombre de quien retira.';
+  if (vacio(correo)) errores.correo = 'Ingresa el correo.';
+  else if (!esCorreoValido(correo)) errores.correo = 'Ingresa un correo válido.';
+  if (vacio(sucursal)) errores.sucursal = 'Selecciona una sucursal.';
+  if (vacio(fecha)) errores.fecha = 'Selecciona la fecha de retiro.';
+  if (vacio(hora)) errores.hora = 'Selecciona la hora de retiro.';
+  return errores;
+}
+
+export function validarDelivery({ nombreDestinatario, telefono, calle, region, comuna, fecha }) {
+  const errores = {};
+  if (vacio(nombreDestinatario)) errores.nombreDestinatario = 'Ingresa el nombre del destinatario.';
+  if (vacio(telefono)) errores.telefono = 'Ingresa un teléfono de contacto.';
+  else if (!/^\+?[0-9\s]{8,15}$/.test(String(telefono).trim())) errores.telefono = 'Ingresa un teléfono válido.';
+  if (vacio(calle)) errores.calle = 'Ingresa la calle y número.';
+  if (vacio(region)) errores.region = 'Selecciona una región.';
+  if (vacio(comuna)) errores.comuna = 'Selecciona una comuna.';
+  if (vacio(fecha)) errores.fecha = 'Selecciona la fecha de entrega.';
   return errores;
 }
