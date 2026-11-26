@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { Button, Col, Container, Nav, Row } from 'react-bootstrap';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { etiquetaRol, ROL_ADMIN, ROL_VENDEDOR } from '../../utils/roles';
 
 const enlaces = [
-  { to: '/admin', texto: 'Dashboard', end: true },
-  { to: '/admin/ordenes', texto: 'Órdenes' },
-  { to: '/admin/productos', texto: 'Productos' },
-  { to: '/admin/categorias', texto: 'Categorías' },
-  { to: '/admin/usuarios', texto: 'Usuarios' },
-  { to: '/admin/entregas', texto: 'Entregas' },
-  { to: '/admin/reportes', texto: 'Reportes' },
-  { to: '/admin/perfil', texto: 'Perfil' },
+  { to: '/admin', texto: 'Dashboard', end: true, roles: [ROL_ADMIN] },
+  { to: '/admin/ordenes', texto: 'Órdenes', roles: [ROL_ADMIN, ROL_VENDEDOR] },
+  { to: '/admin/productos', texto: 'Productos', roles: [ROL_ADMIN, ROL_VENDEDOR] },
+  { to: '/admin/categorias', texto: 'Categorías', roles: [ROL_ADMIN] },
+  { to: '/admin/usuarios', texto: 'Usuarios', roles: [ROL_ADMIN] },
+  { to: '/admin/entregas', texto: 'Entregas', roles: [ROL_ADMIN] },
+  { to: '/admin/reportes', texto: 'Reportes', roles: [ROL_ADMIN] },
+  { to: '/admin/perfil', texto: 'Perfil', roles: [ROL_ADMIN] },
 ];
 
 function AdminLayout() {
@@ -27,8 +28,10 @@ function AdminLayout() {
   return (
     <div className="admin-shell">
       <header className="admin-topbar d-flex align-items-center justify-content-between px-3 py-2">
-        <Link to="/admin" className="logo text-white">Mil Sabores · Admin</Link>
-        <span className="d-none d-md-inline small">{usuario?.nombre} {usuario?.apellidos}</span>
+        <Link to={usuario?.rol === ROL_ADMIN ? '/admin' : '/admin/ordenes'} className="logo text-white">
+          Mil Sabores · {usuario?.rol === ROL_ADMIN ? 'Admin' : 'Ventas'}
+        </Link>
+        <span className="d-none d-md-inline small">{usuario?.nombre} {usuario?.apellidos} · {etiquetaRol(usuario?.rol)}</span>
         <Button variant="outline-light" size="sm" className="d-md-none" aria-expanded={menuAbierto} aria-controls="menu-admin" onClick={() => setMenuAbierto((abierto) => !abierto)}>
           Menú
         </Button>
@@ -37,7 +40,7 @@ function AdminLayout() {
         <Row>
           <Col md={3} lg={2} id="menu-admin" className={`admin-sidebar py-3 ${menuAbierto ? '' : 'd-none'} d-md-block`}>
             <Nav className="flex-column gap-1" onClick={() => setMenuAbierto(false)}>
-              {enlaces.map((enlace) => (
+              {enlaces.filter((enlace) => enlace.roles.includes(usuario?.rol)).map((enlace) => (
                 <Nav.Link key={enlace.to} as={NavLink} to={enlace.to} end={enlace.end}>
                   {enlace.texto}
                 </Nav.Link>

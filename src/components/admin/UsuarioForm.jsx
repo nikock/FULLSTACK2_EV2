@@ -57,6 +57,7 @@ function UsuarioForm({ inicial, onSubmit, onCancelar }) {
         <Col md={4}>
           <CampoFormulario id="usuario-rol" label="Rol" as="select" value={valores.rol} onChange={cambiar('rol')} error={errores.rol}>
             <option value="cliente">Cliente</option>
+            <option value="vendedor">Vendedor</option>
             <option value="admin">Administrador</option>
           </CampoFormulario>
         </Col>

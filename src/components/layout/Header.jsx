@@ -4,6 +4,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useColeccion } from '../../hooks/useColeccion';
+import { ROL_ADMIN, ROL_VENDEDOR } from '../../utils/roles';
 import MiniCarrito from '../store/MiniCarrito';
 
 function Header() {
@@ -59,9 +60,13 @@ function Header() {
             <MiniCarrito detalle={detalle} total={totales.total} cantidadTotal={totales.cantidadTotal} onQuitar={quitar} onVaciar={vaciar} />
             {usuario ? (
               <NavDropdown align="end" title={`Hola, ${usuario.nombre}`} id="menu-cuenta">
-                {usuario.rol === 'admin' && (
+                {usuario.rol === ROL_ADMIN && (
                   <NavDropdown.Item as={Link} to="/admin">Panel de administración</NavDropdown.Item>
                 )}
+                {usuario.rol === ROL_VENDEDOR && (
+                  <NavDropdown.Item as={Link} to="/admin/ordenes">Panel de ventas</NavDropdown.Item>
+                )}
+                <NavDropdown.Item as={Link} to="/mis-compras">Mis compras</NavDropdown.Item>
                 <NavDropdown.Item onClick={cerrarSesion}>Cerrar sesión</NavDropdown.Item>
               </NavDropdown>
             ) : (
