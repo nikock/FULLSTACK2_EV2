@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import ConfirmarModal from '../../components/admin/ConfirmarModal';
 import EncabezadoAdmin from '../../components/admin/EncabezadoAdmin';
 import { useAuth } from '../../context/AuthContext';
-import { usuariosDB } from '../../data/db';
+import { usuariosRepo } from '../../data/store';
+import { etiquetaRol } from '../../utils/roles';
 import { useColeccion } from '../../hooks/useColeccion';
 
 function AdminUsuarios() {
@@ -22,8 +23,12 @@ function AdminUsuarios() {
     setPorEliminar(usuario);
   };
 
-  const eliminar = () => {
-    usuariosDB.eliminar(porEliminar.id);
+  const eliminar = async () => {
+    try {
+      await usuariosRepo.eliminar(porEliminar.id);
+    } catch (e) {
+      setAviso(e.message);
+    }
     setPorEliminar(null);
   };
 
@@ -41,7 +46,7 @@ function AdminUsuarios() {
               <tr key={u.id}>
                 <td>{u.nombre} {u.apellidos}</td>
                 <td>{u.correo}</td>
-                <td><Badge bg={u.rol === 'admin' ? 'dark' : 'secondary'}>{u.rol === 'admin' ? 'Administrador' : 'Cliente'}</Badge></td>
+                <td><Badge bg={u.rol === 'admin' ? 'dark' : u.rol === 'vendedor' ? 'info' : 'secondary'}>{etiquetaRol(u.rol)}</Badge></td>
                 <td>{u.descuento > 0 ? `${u.descuento}%` : '—'}</td>
                 <td>{u.activo ? 'Activo' : 'Inactivo'}</td>
                 <td className="text-nowrap">

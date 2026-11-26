@@ -2,13 +2,16 @@ import { Badge, Table } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import EncabezadoAdmin from '../../components/admin/EncabezadoAdmin';
 import EstadoVacio from '../../components/common/EstadoVacio';
-import { useColeccion } from '../../hooks/useColeccion';
+import { useEstadoColeccion } from '../../hooks/useColeccion';
 import { formatearFecha, formatearPrecio } from '../../utils/formato';
 
 function AdminUsuarioHistorial() {
   const { usuarioId } = useParams();
-  const usuario = useColeccion('usuarios').find((u) => u.id === Number(usuarioId));
-  const ordenes = useColeccion('ordenes');
+  const { datos: usuarios, cargado } = useEstadoColeccion('usuarios');
+  const { datos: ordenes, cargado: ordenesCargadas } = useEstadoColeccion('ordenes');
+  const usuario = usuarios.find((u) => u.id === Number(usuarioId));
+
+  if (!cargado || !ordenesCargadas) return <p role="status">Cargando historial…</p>;
 
   if (!usuario) return <EstadoVacio titulo="Usuario no encontrado" accionTexto="Volver a usuarios" accionHref="/admin/usuarios" />;
 

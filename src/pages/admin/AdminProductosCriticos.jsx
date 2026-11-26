@@ -2,7 +2,7 @@ import { Badge, Button, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import EncabezadoAdmin from '../../components/admin/EncabezadoAdmin';
 import EstadoVacio from '../../components/common/EstadoVacio';
-import { productosDB } from '../../data/db';
+import { productosRepo } from '../../data/store';
 import { useColeccion } from '../../hooks/useColeccion';
 import { productosCriticos } from '../../utils/reportes';
 
@@ -30,7 +30,7 @@ function AdminProductosCriticos() {
                   <td>{p.stock}</td>
                   <td>{p.stockCritico}</td>
                   <td><Badge bg={p.stock === 0 ? 'danger' : 'warning'} text={p.stock === 0 ? undefined : 'dark'}>{p.stock === 0 ? 'Agotado' : 'Por reponer'}</Badge></td>
-                  <td><Button size="sm" variant="mil" onClick={() => productosDB.actualizar(p.id, { stock: p.stock + REPOSICION })}>Reponer +{REPOSICION}</Button></td>
+                  <td><Button size="sm" variant="mil" onClick={() => productosRepo.actualizar(p.id, { ...p, stock: p.stock + REPOSICION })}>Reponer +{REPOSICION}</Button></td>
                 </tr>
               ))}
             </tbody>

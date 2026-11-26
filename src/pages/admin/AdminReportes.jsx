@@ -12,7 +12,7 @@ function AdminReportes() {
   const ordenes = useColeccion('ordenes');
 
   const resumen = resumenGeneral({ productos, usuarios, ordenes });
-  const porCategoria = ventasPorCategoria(ordenes, categorias);
+  const porCategoria = ventasPorCategoria(ordenes, categorias, productos);
   const topProductos = ventasPorProducto(ordenes).slice(0, 5);
   const maximo = Math.max(...porCategoria.map((c) => c.ingresos), 1);
 

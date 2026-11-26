@@ -4,30 +4,35 @@ import { useNavigate, useParams } from 'react-router-dom';
 import EncabezadoAdmin from '../../components/admin/EncabezadoAdmin';
 import UsuarioForm from '../../components/admin/UsuarioForm';
 import EstadoVacio from '../../components/common/EstadoVacio';
-import { usuariosDB } from '../../data/db';
-import { useColeccion } from '../../hooks/useColeccion';
+import { usuariosRepo } from '../../data/store';
+import { useEstadoColeccion } from '../../hooks/useColeccion';
 
 function AdminUsuarioForm() {
   const { usuarioId } = useParams();
   const navigate = useNavigate();
-  const usuarios = useColeccion('usuarios');
+  const { datos: usuarios, cargado } = useEstadoColeccion('usuarios');
   const [error, setError] = useState('');
   const editando = usuarioId !== undefined;
   const usuario = editando ? usuarios.find((u) => u.id === Number(usuarioId)) : undefined;
 
+  if (editando && !cargado) return <p role="status">Cargando usuario…</p>;
   if (editando && !usuario) {
     return <EstadoVacio titulo="Usuario no encontrado" accionTexto="Volver a usuarios" accionHref="/admin/usuarios" />;
   }
 
-  const guardar = (datos) => {
+  const guardar = async (datos) => {
     const duplicado = usuarios.some((u) => u.correo.toLowerCase() === datos.correo.toLowerCase() && u.id !== usuario?.id);
     if (duplicado) {
       setError('Ya existe otro usuario con ese correo.');
       return;
     }
-    if (editando) usuariosDB.actualizar(usuario.id, datos);
-    else usuariosDB.crear({ tortaCumple: false, ...datos });
-    navigate('/admin/usuarios');
+    try {
+      if (editando) await usuariosRepo.actualizar(usuario.id, datos);
+      else await usuariosRepo.crear(datos);
+      navigate('/admin/usuarios');
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
