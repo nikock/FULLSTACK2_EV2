@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { Badge, Form, Table } from 'react-bootstrap';
+import { Alert, Badge, Form, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import EncabezadoAdmin from '../../components/admin/EncabezadoAdmin';
 import EstadoVacio from '../../components/common/EstadoVacio';
-import { useColeccion } from '../../hooks/useColeccion';
+import { useEstadoColeccion } from '../../hooks/useColeccion';
 import { formatearFecha, formatearPrecio } from '../../utils/formato';
 
 function AdminOrdenes() {
-  const ordenes = useColeccion('ordenes');
+  const { datos: ordenes, cargado, error } = useEstadoColeccion('ordenes');
   const [estado, setEstado] = useState('todas');
-  const visibles = [...ordenes].reverse().filter((o) => estado === 'todas' || o.estado === estado);
+  const visibles = ordenes.filter((o) => estado === 'todas' || o.estado === estado);
 
   return (
     <>
@@ -21,9 +21,12 @@ function AdminOrdenes() {
         </Form.Select>
       </EncabezadoAdmin>
 
-      {visibles.length === 0 ? (
+      {error && <Alert variant="danger" role="alert">{error}</Alert>}
+      {!cargado && !error && <p role="status">Cargando órdenes…</p>}
+
+      {cargado && visibles.length === 0 ? (
         <EstadoVacio titulo="Aún no hay órdenes" texto="Cuando un cliente compre, la orden aparecerá aquí." />
-      ) : (
+      ) : cargado && (
         <div className="table-responsive">
           <Table hover className="align-middle tabla-mil">
             <thead>

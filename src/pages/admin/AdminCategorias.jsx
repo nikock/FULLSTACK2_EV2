@@ -3,7 +3,7 @@ import { Alert, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import ConfirmarModal from '../../components/admin/ConfirmarModal';
 import EncabezadoAdmin from '../../components/admin/EncabezadoAdmin';
-import { categoriasDB } from '../../data/db';
+import { categoriasRepo } from '../../data/store';
 import { useColeccion } from '../../hooks/useColeccion';
 
 function AdminCategorias() {
@@ -23,8 +23,12 @@ function AdminCategorias() {
     setPorEliminar(categoria);
   };
 
-  const eliminar = () => {
-    categoriasDB.eliminar(porEliminar.id);
+  const eliminar = async () => {
+    try {
+      await categoriasRepo.eliminar(porEliminar.id);
+    } catch (e) {
+      setAviso(e.message);
+    }
     setPorEliminar(null);
   };
 
