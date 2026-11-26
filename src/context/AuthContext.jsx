@@ -1,62 +1,136 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { usuariosDB } from '../data/db';
-import { useColeccion } from '../hooks/useColeccion';
-import { calcularBeneficios } from '../utils/beneficios';
-import { borrarClave, guardarJSON, leerJSON } from '../utils/storage';
+import { login as loginApi, obtenerPerfil, registro as registroApi } from '../api/authApi';
+import {
+  CLAVE_TOKEN,
+  cerrarSesion,
+  getToken,
+  getUsuarioGuardado,
+  guardarSesion,
+  guardarUsuario,
+  suscribirSesionExpirada,
+} from '../auth/auth';
+import { limpiarDatosPrivados } from '../data/store';
+import { describirBeneficios } from '../utils/beneficios';
 
 export const AuthContext = createContext(null);
 
-const normalizar = (correo) => String(correo ?? '').trim().toLowerCase();
-
 export function AuthProvider({ children }) {
-  const usuarios = useColeccion('usuarios');
-  const [usuarioId, setUsuarioId] = useState(() => leerJSON('sesion', null));
-
-  const usuario = useMemo(() => usuarios.find((u) => u.id === usuarioId) ?? null, [usuarios, usuarioId]);
+  const [usuario, setUsuario] = useState(() => (getToken() ? getUsuarioGuardado() : null));
+  const [cargando, setCargando] = useState(() => getToken() !== null);
 
   useEffect(() => {
-    if (usuarioId === null) borrarClave('sesion');
-    else guardarJSON('sesion', usuarioId);
-  }, [usuarioId]);
+    if (!getToken()) {
+      setCargando(false);
+      return undefined;
+    }
+    let cancelado = false;
+    obtenerPerfil()
+      .then((perfil) => {
+        if (cancelado) return;
+        guardarUsuario(perfil);
+        setUsuario(perfil);
+      })
+      .catch((error) => {
+        if (cancelado) return;
+        if ([401, 403, 404].includes(error.status)) cerrarSesion();
+        setUsuario(null);
+      })
+      .finally(() => {
+        if (!cancelado) setCargando(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  useEffect(
+    () =>
+      suscribirSesionExpirada(() => {
+        limpiarDatosPrivados();
+        setUsuario(null);
+      }),
+    [],
+  );
+
+  useEffect(() => {
+    const alCambiarAlmacenamiento = (evento) => {
+      if (evento.key === CLAVE_TOKEN && evento.newValue === null) {
+        limpiarDatosPrivados();
+        setUsuario(null);
+      }
+    };
+    window.addEventListener('storage', alCambiarAlmacenamiento);
+    return () => window.removeEventListener('storage', alCambiarAlmacenamiento);
+  }, []);
+
+  const iniciarSesion = useCallback((respuesta) => {
+    guardarSesion(respuesta);
+    limpiarDatosPrivados();
+    setUsuario(respuesta.usuario);
+    setCargando(false);
+  }, []);
 
   const login = useCallback(
-    (correo, clave) => {
-      const encontrado = usuarios.find((u) => normalizar(u.correo) === normalizar(correo) && u.clave === clave);
-      if (!encontrado) return { ok: false, error: 'Correo o contraseña incorrectos.' };
-      if (!encontrado.activo) return { ok: false, error: 'Tu cuenta está desactivada.' };
-      setUsuarioId(encontrado.id);
-      return { ok: true, usuario: encontrado };
+    async (correo, clave) => {
+      try {
+        const respuesta = await loginApi(correo.trim(), clave);
+        iniciarSesion(respuesta);
+        return { ok: true, usuario: respuesta.usuario };
+      } catch (error) {
+        return { ok: false, error: error.message };
+      }
     },
-    [usuarios],
+    [iniciarSesion],
   );
-
-  const logout = useCallback(() => setUsuarioId(null), []);
 
   const registrar = useCallback(
-    ({ nombre, apellidos, correo, nacimiento, codigo, clave }) => {
-      if (usuarios.some((u) => normalizar(u.correo) === normalizar(correo))) {
-        return { ok: false, error: 'Ya existe una cuenta con ese correo.' };
+    async ({ nombre, apellidos, correo, nacimiento, codigo, clave, telefono }) => {
+      try {
+        const respuesta = await registroApi({
+          nombre: nombre.trim(),
+          apellidos: apellidos.trim(),
+          correo: correo.trim(),
+          nacimiento,
+          codigo: codigo?.trim(),
+          clave,
+          telefono: telefono?.trim(),
+        });
+        iniciarSesion(respuesta);
+        return { ok: true, usuario: respuesta.usuario, beneficios: describirBeneficios(respuesta.usuario) };
+      } catch (error) {
+        return { ok: false, error: error.message };
       }
-      const beneficios = calcularBeneficios({ nacimiento, codigo, correo });
-      const nuevo = usuariosDB.crear({
-        nombre: nombre.trim(),
-        apellidos: apellidos.trim(),
-        correo: correo.trim(),
-        clave,
-        rol: 'cliente',
-        nacimiento,
-        telefono: '',
-        descuento: beneficios.descuento,
-        tortaCumple: beneficios.tortaCumple,
-        activo: true,
-      });
-      setUsuarioId(nuevo.id);
-      return { ok: true, usuario: nuevo, beneficios };
     },
-    [usuarios],
+    [iniciarSesion],
   );
 
-  const valor = useMemo(() => ({ usuario, login, logout, registrar }), [usuario, login, logout, registrar]);
+  const logout = useCallback(() => {
+    cerrarSesion();
+    limpiarDatosPrivados();
+    setUsuario(null);
+  }, []);
+
+  const recargarUsuario = useCallback(async () => {
+    const perfil = await obtenerPerfil();
+    guardarUsuario(perfil);
+    setUsuario(perfil);
+    return perfil;
+  }, []);
+
+  const valor = useMemo(
+    () => ({
+      usuario,
+      cargando,
+      rol: usuario?.rol ?? null,
+      autenticado: usuario !== null,
+      tieneRol: (...roles) => usuario !== null && roles.includes(usuario.rol),
+      login,
+      logout,
+      registrar,
+      recargarUsuario,
+    }),
+    [usuario, cargando, login, logout, registrar, recargarUsuario],
+  );
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;
 }
 
