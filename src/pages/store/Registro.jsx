@@ -14,20 +14,23 @@ function Registro() {
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState('');
   const [beneficios, setBeneficios] = useState(null);
+  const [enviando, setEnviando] = useState(false);
 
   const cambiar = (campo) => (evento) => {
     setValores((actual) => ({ ...actual, [campo]: evento.target.value }));
     if (errores[campo]) setErrores((actual) => ({ ...actual, [campo]: undefined }));
   };
 
-  const enviar = (evento) => {
+  const enviar = async (evento) => {
     evento.preventDefault();
     setErrorGeneral('');
     const nuevosErrores = validarRegistro(valores);
     setErrores(nuevosErrores);
     if (!esValido(nuevosErrores)) return;
 
-    const resultado = registrar(valores);
+    setEnviando(true);
+    const resultado = await registrar(valores);
+    setEnviando(false);
     if (!resultado.ok) {
       setErrorGeneral(resultado.error);
       return;
@@ -80,7 +83,7 @@ function Registro() {
           <Col md={6}><CampoFormulario id="registro-confirmar" label="Repite la contraseña" type="password" value={valores.confirmarClave} onChange={cambiar('confirmarClave')} error={errores.confirmarClave} autoComplete="new-password" /></Col>
         </Row>
         {errorGeneral && <Alert variant="danger" role="alert">{errorGeneral}</Alert>}
-        <Button type="submit" variant="mil" className="w-100">Crear cuenta</Button>
+        <Button type="submit" variant="mil" className="w-100" disabled={enviando}>{enviando ? 'Creando cuenta…' : 'Crear cuenta'}</Button>
       </form>
     </Container>
   );

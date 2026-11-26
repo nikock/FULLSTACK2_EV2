@@ -3,12 +3,12 @@ import { Link, useParams } from 'react-router-dom';
 import EstadoVacio from '../../components/common/EstadoVacio';
 import ProductGrid from '../../components/store/ProductGrid';
 import { useCart } from '../../context/CartContext';
-import { useColeccion } from '../../hooks/useColeccion';
+import { useEstadoColeccion } from '../../hooks/useColeccion';
 
 function Categorias() {
   const { categoriaId } = useParams();
-  const categorias = useColeccion('categorias');
-  const productos = useColeccion('productos');
+  const { datos: categorias, cargado } = useEstadoColeccion('categorias');
+  const { datos: productos } = useEstadoColeccion('productos');
   const { agregar } = useCart();
 
   const mostradas = categoriaId ? categorias.filter((c) => c.id === Number(categoriaId)) : categorias;
@@ -27,7 +27,7 @@ function Categorias() {
         ))}
       </Row>
 
-      {mostradas.length === 0 && <EstadoVacio titulo="Categoría no encontrada" accionTexto="Ver todas las categorías" accionHref="/categorias" />}
+      {cargado && mostradas.length === 0 && <EstadoVacio titulo="Categoría no encontrada" accionTexto="Ver todas las categorías" accionHref="/categorias" />}
 
       {mostradas.map((categoria) => (
         <section key={categoria.id} className="mb-5" aria-labelledby={`cat-${categoria.id}`}>

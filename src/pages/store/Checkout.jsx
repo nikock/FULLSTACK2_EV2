@@ -9,8 +9,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { comunasDe, regiones } from '../../data/regiones';
 import { SUCURSALES, TIPO_DELIVERY, TIPO_RETIRO } from '../../data/sucursales';
+import { crearOrden } from '../../api/ordenApi';
+import { conDatosDeEntrega } from '../../api/mapeadores';
+import { recargar } from '../../data/store';
+import { useEstadoColeccion } from '../../hooks/useColeccion';
 import { calcularTotales } from '../../utils/cart';
-import { confirmarCompra } from '../../utils/compra';
 import { sincronizarEntrega } from '../../utils/entrega';
 import { formatearPrecio } from '../../utils/formato';
 import { esValido, validarCheckout } from '../../utils/validators';
@@ -37,9 +40,16 @@ function Checkout() {
   });
   const [errores, setErrores] = useState({});
   const [forzarRechazo, setForzarRechazo] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [errorGeneral, setErrorGeneral] = useState('');
+  const { cargado: catalogoCargado } = useEstadoColeccion('productos');
 
   const descuento = usuario?.descuento ?? 0;
   const totales = calcularTotales(detalle, descuento);
+
+  if (!catalogoCargado) {
+    return <Container className="py-4"><p role="status">Cargando tu pedido…</p></Container>;
+  }
 
   if (detalle.length === 0) {
     return (
@@ -56,32 +66,40 @@ function Checkout() {
     if (errores[campo]) setErrores((actual) => ({ ...actual, [campo]: undefined }));
   };
 
-  const enviar = (evento) => {
+  const enviar = async (evento) => {
     evento.preventDefault();
     const nuevosErrores = validarCheckout(valores);
     setErrores(nuevosErrores);
     if (!esValido(nuevosErrores)) return;
 
     const esRetiro = valores.tipoEntrega === TIPO_RETIRO;
-    const orden = confirmarCompra({
-      cliente: { nombre: valores.nombre.trim(), apellidos: valores.apellidos.trim(), correo: valores.correo.trim() },
-      entrega: esRetiro
-        ? { tipo: TIPO_RETIRO, sucursal: valores.sucursal, fecha: valores.fecha, hora: valores.hora }
-        : { tipo: TIPO_DELIVERY, telefono: valores.telefono.trim(), fecha: valores.fecha },
-      direccion: esRetiro
-        ? null
-        : { calle: valores.calle.trim(), departamento: valores.departamento.trim(), region: valores.region, comuna: valores.comuna, indicaciones: valores.indicaciones.trim() },
-      detalle,
-      totales,
-      usuarioId: usuario?.id ?? null,
-      forzarRechazo,
-    });
+    const cliente = { nombre: valores.nombre.trim(), apellidos: valores.apellidos.trim(), correo: valores.correo.trim() };
+    const entrega = esRetiro
+      ? { tipo: TIPO_RETIRO, sucursal: valores.sucursal, fecha: valores.fecha, hora: valores.hora }
+      : { tipo: TIPO_DELIVERY, telefono: valores.telefono.trim(), fecha: valores.fecha };
+    const direccion = esRetiro
+      ? null
+      : { calle: valores.calle.trim(), departamento: valores.departamento.trim(), region: valores.region, comuna: valores.comuna, indicaciones: valores.indicaciones.trim() };
 
-    if (orden.estado === 'pagada') {
-      sincronizarEntrega(orden);
-      vaciar();
+    setErrorGeneral('');
+    setEnviando(true);
+    try {
+      
+      const creada = await crearOrden({ tipoEntrega: valores.tipoEntrega, detalle, forzarRechazo });
+      const orden = conDatosDeEntrega(creada, { cliente, entrega, direccion });
+      recargar('productos'); 
+      if (orden.estado === 'pagada') {
+        await sincronizarEntrega(orden);
+        vaciar();
+      }
+      navigate(orden.estado === 'pagada' ? `/compra/exito/${orden.id}` : `/compra/error/${orden.id}`, {
+        state: { cliente, entrega, direccion },
+      });
+    } catch (error) {
+      setErrorGeneral(error.message);
+      if (error.status === 409) recargar('productos'); 
+      setEnviando(false);
     }
-    navigate(orden.estado === 'pagada' ? `/compra/exito/${orden.id}` : `/compra/error/${orden.id}`);
   };
 
   return (
@@ -144,7 +162,11 @@ function Checkout() {
             <Form.Check id="checkout-rechazo" type="switch" className="mb-3" label="Simular pago rechazado (modo demostración)" checked={forzarRechazo} onChange={(e) => setForzarRechazo(e.target.checked)} />
             {forzarRechazo && <Alert variant="warning">El pago se rechazará para que puedas probar el flujo de error.</Alert>}
 
-            <Button type="submit" variant="mil" size="lg" className="w-100">Pagar ahora {formatearPrecio(totales.total)}</Button>
+            {errorGeneral && <Alert variant="danger" role="alert">{errorGeneral}</Alert>}
+
+            <Button type="submit" variant="mil" size="lg" className="w-100" disabled={enviando}>
+              {enviando ? 'Procesando pago…' : `Pagar ahora ${formatearPrecio(totales.total)}`}
+            </Button>
           </Form>
         </Col>
         <Col lg={5}>

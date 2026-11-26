@@ -1,6 +1,6 @@
 import { Container } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
-import { blogsSeed } from '../../data/seeds';
+import { blogsSeed } from '../../data/blogs';
 import { formatearFecha } from '../../utils/formato';
 
 function BlogDetalle() {

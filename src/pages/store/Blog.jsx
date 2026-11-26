@@ -1,6 +1,6 @@
 import { Card, Col, Container, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { blogsSeed } from '../../data/seeds';
+import { blogsSeed } from '../../data/blogs';
 import { formatearFecha } from '../../utils/formato';
 
 function Blog() {

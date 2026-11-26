@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { Alert, Button, Container } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { conDatosDeEntrega } from '../../api/mapeadores';
 import OrdenDetalle from '../../components/store/OrdenDetalle';
-import { ordenesDB } from '../../data/db';
+import { useOrden } from '../../hooks/useOrden';
 
 function CompraExitosa() {
   const { ordenId } = useParams();
-  const orden = ordenesDB.obtenerPorId(ordenId);
+  const ubicacion = useLocation();
+  const [{ orden: base, cargando }] = useOrden(ordenId);
   const [correoEnviado, setCorreoEnviado] = useState(false);
 
-  if (!orden || orden.estado !== 'pagada') {
+  if (cargando) {
+    return <Container className="py-5 text-center"><p role="status">Cargando tu compra…</p></Container>;
+  }
+
+  if (!base || base.estado !== 'pagada') {
     return (
       <Container className="py-5 text-center">
         <h1>No encontramos esa compra</h1>
@@ -17,6 +23,8 @@ function CompraExitosa() {
       </Container>
     );
   }
+
+  const orden = conDatosDeEntrega(base, ubicacion.state ?? {});
 
   return (
     <Container className="py-4 pagina-compra">

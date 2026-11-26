@@ -4,17 +4,18 @@ import { Link, useParams } from 'react-router-dom';
 import PrecioProducto from '../../components/common/PrecioProducto';
 import ProductGrid from '../../components/store/ProductGrid';
 import { useCart } from '../../context/CartContext';
-import { useColeccion } from '../../hooks/useColeccion';
+import { useEstadoColeccion } from '../../hooks/useColeccion';
 
 function ProductoDetalle() {
   const { productoId } = useParams();
-  const productos = useColeccion('productos');
-  const categorias = useColeccion('categorias');
+  const { datos: productos, cargado } = useEstadoColeccion('productos');
+  const { datos: categorias } = useEstadoColeccion('categorias');
   const { agregar } = useCart();
   const [cantidad, setCantidad] = useState(1);
   const [agregado, setAgregado] = useState(false);
 
   const producto = productos.find((p) => p.id === Number(productoId));
+  if (!cargado) return <Container className="py-5 text-center"><p role="status">Cargando producto…</p></Container>;
   if (!producto) {
     return (
       <Container className="py-5 text-center">
