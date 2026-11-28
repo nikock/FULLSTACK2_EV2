@@ -38,3 +38,7 @@ export function borrarClave(clave) {
   } catch {
   }
 }
+
+export function limpiarDatosLocalesAntiguos() {
+  ['productos', 'categorias', 'usuarios', 'ordenes', 'sesion'].forEach(borrarClave);
+}

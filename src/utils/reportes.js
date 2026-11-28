@@ -22,11 +22,12 @@ export function ventasPorProducto(ordenes) {
   return [...acumulado.values()].sort((a, b) => b.ingresos - a.ingresos);
 }
 
-export function ventasPorCategoria(ordenes, categorias) {
+export function ventasPorCategoria(ordenes, categorias, productos = []) {
   const acumulado = new Map(categorias.map((c) => [c.id, { categoriaId: c.id, nombre: c.nombre, unidades: 0, ingresos: 0 }]));
   pagadas(ordenes).forEach((orden) =>
     orden.items.forEach((item) => {
-      const fila = acumulado.get(item.categoriaId);
+      const categoriaId = item.categoriaId ?? productos.find((p) => p.id === item.productoId)?.categoriaId;
+      const fila = acumulado.get(categoriaId);
       if (fila) {
         fila.unidades += item.cantidad;
         fila.ingresos += item.subtotal;

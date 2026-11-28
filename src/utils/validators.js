@@ -84,7 +84,7 @@ export function validarUsuarioAdmin({ nombre, apellidos, correo, clave, rol }, {
   if (vacio(apellidos)) errores.apellidos = 'Ingresa los apellidos.';
   if (vacio(correo)) errores.correo = 'Ingresa el correo.';
   else if (!esCorreoValido(correo)) errores.correo = 'Ingresa un correo válido.';
-  if (!['admin', 'cliente'].includes(rol)) errores.rol = 'Selecciona un rol.';
+  if (!['admin', 'vendedor', 'cliente'].includes(rol)) errores.rol = 'Selecciona un rol.';
   if (esNuevo && vacio(clave)) errores.clave = 'Ingresa una contraseña.';
   else if (!vacio(clave) && clave.length < 6) errores.clave = 'La contraseña debe tener al menos 6 caracteres.';
   return errores;

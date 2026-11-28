@@ -29,3 +29,11 @@ export function calcularBeneficios({ nacimiento, codigo = '', correo = '' }, hoy
 
   return { descuento, tortaCumple, mensajes };
 }
+
+export function describirBeneficios(usuario) {
+  const mensajes = [];
+  if (usuario.descuento >= 50) mensajes.push('Tienes 50% de descuento de por vida.');
+  else if (usuario.descuento > 0) mensajes.push(`Código válido: ${usuario.descuento}% de descuento de por vida.`);
+  if (usuario.tortaCumple) mensajes.push('Como estudiante Duoc, tendrás una torta gratis en tu cumpleaños.');
+  return { descuento: usuario.descuento, tortaCumple: usuario.tortaCumple, mensajes };
+}
